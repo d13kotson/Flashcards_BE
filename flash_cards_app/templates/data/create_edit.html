@@ -1,0 +1,101 @@
+{% extends "app.html" %}
+
+{% block app %}
+<div id="data_formats" class="app-window">
+    <script>
+        function createData() {
+            let format = $("#df-input").val();
+            let field_values = $(`#field-div-${format} .field-value-div`);
+            let field_value_set = [];
+            for(field of field_values) {
+                field_value_set.push({
+                    "field": field.children[0].value,
+                    "value": field.children[2].value
+                });
+            }
+            sendPost("/api/data/", {
+                "name": $("input#name-input").val(),
+                "format": format,
+                "field_value_set": field_value_set
+            }, () => {
+                $(location).attr("href", "/app/data/");
+            }, null);
+        }
+
+        function editData() {
+            let format = $("#df-input").val();
+            let field_values = $(`#field-div-${format} .field-value-div`);
+            let field_value_set = [];
+            for(field of field_values) {
+                field_value_set.push({
+                    "field": field.children[0].value,
+                    "value": field.children[2].value
+                });
+            }
+            sendPatch("/api/data/{{id}}/", {
+                "name": $("input#name-input").val(),
+                "format": format,
+                "field_value_set": field_value_set
+            }, () => {
+                $(location).attr("href", "/app/data/");
+            }, null);
+        }
+
+        function createField(format, field) {
+            if(field.xpath == "") {
+                $(`#field-div-${format}`).append(`<div class="spacer field-value-div"><input type="hidden" class="field-id-input" value="${field.id}"/><label class="input-label">${field.name}:</label><input id="field-input-{field.id}" class="input-field field-value-input" type="text"/></div>`);
+            }
+        }
+
+        function createFieldSet(df) {
+            if(df.id == {{format}}) {
+                $('#field-inputs').append(`<div class="field-divs" id="field-div-${df.id}"></div>`);
+            }
+            else {
+                $('#field-inputs').append(`<div class="field-divs" id="field-div-${df.id}" style="display: none;"></div>`);
+            }
+            df.field_set.map((field) => createField(df.id, field));
+        }
+
+        function setDataFormat() {
+            let newFormat = $("#df-input").val();
+            $(".field-divs").attr("style", "display: none;");
+            $(`#field-div-${newFormat}`).attr("style", "display: block;");
+        }
+
+        function getDataFormats(data) {
+            data.map((df) => {
+                if(df.id == {{format}}){
+                    $("#df-input").append(`<option class="data-format-option" value="${df.id}" selected="selected">${df.name}</option>`);
+                }
+                else {
+                    $("#df-input").append(`<option class="data-format-option" value="${df.id}">${df.name}</option>`);
+                }
+                createFieldSet(df);
+            });
+        }
+
+        $(document).ready(function() {
+            sendGet("/api/data-formats", getDataFormats, null);
+        });
+    </script>
+    <div class="spacer">
+        <input type="hidden" value="{{id}}"/>
+        <div class="spacer">
+            <label class="input-label" for="name">Name: </label>
+            <input id="name-input" class="input-field" name="name" type="text" value="{{name}}"/>
+        </div>
+        <div class="spacer">
+            <label class="input-label" for="df">Data Format: </label>
+            <select id="df-input" name="df" onchange="setDataFormat()">
+                <option value="0">Select a data format</option>
+            </select>
+        </div>
+        <div id="field-inputs" class="spacer">
+        </div>
+    </div>
+    <div class="spacer">
+        <button class="input-button" onclick="{{ action.lower }}Data()">{{action}} Data</button>
+    </div>
+</div>
+{% endblock %}

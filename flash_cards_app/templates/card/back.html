@@ -1,0 +1,25 @@
+<div>
+  <div>
+    {% autoescape off %}}
+    {{ amswer }}
+    {{% endautoescape %}}
+  </div>
+  <div>
+    {% if validation_mode == 'NONE' %}
+    <div class="spacer">
+        <button class="input-button" onclick="">Right</button>
+        <button class="input-button" onclick="">Wrong</button>
+    </div>
+    {% else %}
+    <div class="spacer">
+      <span>{{ response }}</span>
+      {% if response_correct %}
+      <button class="input-button" onclick="">Next</button>
+      {% else %}
+      <button class="input-button" onclick="">Actually, I'm right</button>
+      <button class="input-button" onclick="">Wrong</button>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>

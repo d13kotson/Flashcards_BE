@@ -1,0 +1,61 @@
+{% extends "app.html" %}
+
+{% block app %}
+<div id="data_formats" class="app-window">
+    <script>
+        let fields = [];
+
+        function createDataFormat() {
+            sendPost("/api/data-formats/", {
+                "name": $("input#name-input").val(),
+                "url": $("input#url-input").val(),
+                "field_set": fields.map((field) => { return {
+                    "name": field.children()[1].value,
+                    "order": field.children()[4].value,
+                    "xpath": field.children()[7].value
+                }})
+            }, () => {
+                $(location).attr("href", "/app/data-formats/");
+            }, null);
+        }
+
+        function editDataFormat() {
+            sendPatch("/api/data-formats/{{id}}/", {
+                "name": $("input#name-input").val(),
+                "url": $("input#url-input").val(),
+                "field_set": fields.map((field) => { return {
+                    "name": field.children()[1].value,
+                    "order": field.children()[4].value,
+                    "xpath": field.children()[7].value
+                }})
+            }, () => {
+                $(location).attr("href", "/app/data-formats/");
+            }, null);
+        }
+
+        function createField() {
+            let field = $('<div class="spacer"><label class="input-label">Field Name:</label><input class="input-field" type="text"/><br /><label class="input-label">Field Order:</label><input class="input-field" type="number"/><br /><label class="input-label">Field XPath:</label><input class="input-field" type="text"/></div>');
+            fields.push(field);
+            $("#fields-div").append(field);
+        }
+    </script>
+    <div class="spacer">
+        <input type="hidden" value="{{id}}"/>
+        <div class="spacer">
+            <label class="input-label" for="name">Name: </label>
+            <input id="name-input" class="input-field" name="name" type="text" value="{{name}}"/>
+        </div>
+        <div class="spacer">
+            <label class="input-label" for="url">URL: </label>
+            <input id="url-input" class="input-field" name="url" type="text" value="{{url}}"/>
+        </div>
+        <div id="fields-div"></div>
+    </div>
+    <div class="spacer">
+        <button class="input-button" onclick="createField()">Add Field</button>
+    </div>
+    <div class="spacer">
+        <button class="input-button" onclick="{{ action.lower }}DataFormat()">{{action}} Data Format</button>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "app.html" %}
+
+{% block app %}
+<div id="decks" class="app-window">
+    <script>
+        function createData() {
+            $(location).attr("href", "/app/data/create");
+        }
+
+        function createList(data) {
+             data.map((item) => {
+                $("#data-list").append(
+                    `<li>
+                        <div class="spacer">
+                            <a class="list-link" href="/app/data/${item.id}/">${item.name}</a>
+                        </div>
+                    </li>`
+                );
+             });
+        }
+
+        $(document).ready(function() {
+            sendGet("/api/data", createList, null)
+        });
+    </script>
+    <div class="scrollable deck-list">
+        <ul id="data-list">
+        </ul>
+    </div>
+    <div>
+        <button class="input-button" onclick="createData()">Add Data</button>
+    </div>
+</div>
+{% endblock %}

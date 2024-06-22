@@ -1,0 +1,34 @@
+{% extends "app.html" %}
+
+{% block app %}
+<div id="decks" class="app-window">
+    <script>
+        function createDeck() {
+            $(location).attr("href", "/app/decks/create");
+        }
+
+        function createList(data) {
+             data.map((deck) => {
+                $("#deck-list").append(
+                    `<li>
+                        <div class="spacer">
+                            <a class="list-link" href="/app/decks/${deck.id}/">${deck.name}</a>
+                        </div>
+                    </li>`
+                );
+             });
+        }
+
+        $(document).ready(function() {
+            sendGet("/api/decks", createList, null)
+        });
+    </script>
+    <div class="scrollable deck-list">
+        <ul id="deck-list">
+        </ul>
+    </div>
+    <div>
+        <button class="input-button" onclick="createDeck()">Create New Deck</button>
+    </div>
+</div>
+{% endblock %}

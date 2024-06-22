@@ -1,0 +1,34 @@
+{% extends "app.html" %}
+
+{% block app %}
+<div id="decks" class="app-window">
+    <script>
+        function createDataFormat() {
+            $(location).attr("href", "/app/data-formats/create");
+        }
+
+        function createList(data) {
+             data.map((df) => {
+                $("#data-format-list").append(
+                    `<li>
+                        <div class="spacer">
+                            <a class="list-link" href="/app/data-formats/${df.id}/">${df.name}</a>
+                        </div>
+                    </li>`
+                );
+             });
+        }
+
+        $(document).ready(function() {
+            sendGet("/api/data-formats", createList, null)
+        });
+    </script>
+    <div class="scrollable deck-list">
+        <ul id="data-format-list">
+        </ul>
+    </div>
+    <div>
+        <button class="input-button" onclick="createDataFormat()">Create New Data Format</button>
+    </div>
+</div>
+{% endblock %}

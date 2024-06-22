@@ -1,0 +1,34 @@
+{% extends "app.html" %}
+
+{% block app %}
+<div id="decks" class="app-window">
+    <script>
+        function createCardFormat() {
+            $(location).attr("href", "/app/card-formats/create");
+        }
+
+        function createList(card) {
+             card.map((df) => {
+                $("#card-format-list").append(
+                    `<li>
+                        <div class="spacer">
+                            <a class="list-link" href="/app/card-formats/${df.id}/">${df.name}</a>
+                        </div>
+                    </li>`
+                );
+             });
+        }
+
+        $(document).ready(function() {
+            sendGet("/api/card-formats", createList, null)
+        });
+    </script>
+    <div class="scrollable deck-list">
+        <ul id="card-format-list">
+        </ul>
+    </div>
+    <div>
+        <button class="input-button" onclick="createCardFormat()">Create New Card Format</button>
+    </div>
+</div>
+{% endblock %}

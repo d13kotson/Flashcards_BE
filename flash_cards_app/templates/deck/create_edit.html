@@ -1,0 +1,30 @@
+{% extends "app.html" %}
+
+{% block app %}
+<div id="decks" class="app-window">
+    <script>
+        function createDeck() {
+            sendPost("/api/decks/", {
+                "name": $("input#name-input").val()
+            }, () => {
+                $(location).attr("href", "/app/decks/");
+            }, null);
+        }
+        function editDeck() {
+            sendPatch("/api/decks/{{id}}/", {
+                "name": $("input#name-input").val()
+            }, () => {
+                $(location).attr("href", "/app/decks/");
+            }, null);
+        }
+    </script>
+    <div class="spacer">
+        <input type="hidden" value="{{id}}"/>
+        <label class="input-label" for="name">Name: </label>
+        <input id="name-input" class="input-field" name="name" type="text" value="{{name}}"/>
+    </div>
+    <div class="spacer">
+        <button class="input-button" onclick="{{ action.lower }}Deck()">{{action}} Deck</button>
+    </div>
+</div>
+{% endblock %}

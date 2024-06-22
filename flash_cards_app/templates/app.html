@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content%}
+<script src="/static/js/flashcards.js"></script>
+<div id="app">
+  <div class="sidebar-wrapper">
+    <div id="sidebar" class="sidebar">
+      <a href="/app/decks" class="sidebar-item list-link">Decks</a>
+      <a href="/app/data-formats" class="sidebar-item list-link">Data Formats</a>
+      <a href="/app/data" class="sidebar-item list-link">Data</a>
+      <a href="/app/card-formats" class="sidebar-item list-link">Card Formats</a>
+      <a href="/app/cards" class="sidebar-item list-link">Cards</a>
+    </div>
+  </div>
+  <div id="main-body" class="main-body">
+    <div id="error-box"></div>
+    {% block app %}
+    {% endblock %}
+  </div>
+</div>
+{% endblock %}

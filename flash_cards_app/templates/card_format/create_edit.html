@@ -1,0 +1,90 @@
+{% extends "app.html" %}
+
+{% block app %}
+<div id="card_formats" class="app-window">
+    <script>
+        function createCardFormat() {
+            let data = {
+                "name": $("input#name-input").val(),
+                "question_html": $("input#question-input").val(),
+                "answer_html": $("input#answer-input").val(),
+                "data_format": $("select#df-input").val(),
+                "default_deck": $("select#deck-input").val(),
+            }
+            sendPost("/api/card-formats/", data, () => {
+                $(location).attr("href", "/app/card-formats/");
+            }, null);
+        }
+
+        function editCardFormat() {
+            let data = {
+                "name": $("input#name-input").val(),
+                "question_html": $("input#question-input").val(),
+                "answer_html": $("input#answer-input").val(),
+                "data_format": $("select#df-input").val(),
+                "default_deck": $("select#deck-input").val(),
+            }
+            sendPatch("/api/card-formats/{{id}}/", data, () => {
+                $(location).attr("href", "/app/card-formats/");
+            }, null);
+        }
+
+        function getDataFormats(data) {
+            data.map((df) => {
+                if(df.id == {{data_format}}){
+                    $("#df-input").append(`<option value="${df.id}" selected="selected">${df.name}</option>`);
+                }
+                else {
+                    $("#df-input").append(`<option value="${df.id}">${df.name}</option>`);
+                }
+            });
+        }
+
+        function getDecks(data) {
+            data.map((deck) => {
+                if(deck.id == {{default_deck}}){
+                    $("#deck-input").append(`<option value="${deck.id}" selected="selected">${deck.name}</option>`);
+                }
+                else {
+                    $("#deck-input").append(`<option value="${deck.id}">${deck.name}</option>`);
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            sendGet("/api/decks", getDecks, null);
+            sendGet("/api/data-formats", getDataFormats, null);
+        });
+    </script>
+    <div class="spacer">
+        <input type="hidden" value="{{id}}"/>
+        <div class="spacer">
+            <label class="input-label" for="name">Name: </label>
+            <input id="name-input" class="input-field" name="name" type="text" value="{{name}}"/>
+        </div>
+        <div class="spacer">
+            <label class="input-label" for="question">Question Template: </label>
+            <input id="question-input" class="input-field" name="question" type="text" value="{{question_html}}"/>
+        </div>
+        <div class="spacer">
+            <label class="input-label" for="answer">Answer Template: </label>
+            <input id="answer-input" class="input-field" name="answer" type="text" value="{{answer_html}}"/>
+        </div>
+        <div class="spacer">
+            <label class="input-label" for="df">Data Format: </label>
+            <select id="df-input" name="df">
+                <option value="0">Select a data format</option>
+            </select>
+        </div>
+        <div class="spacer">
+            <label class="input-label" for="deck">Default Deck: </label>
+            <select id="deck-input" name="deck">
+                <option value="0">Select a default deck</option>
+            </select>
+        </div>
+    </div>
+    <div class="spacer">
+        <button class="input-button" onclick="{{ action.lower }}CardFormat()">{{action}} Card Format</button>
+    </div>
+</div>
+{% endblock %}
