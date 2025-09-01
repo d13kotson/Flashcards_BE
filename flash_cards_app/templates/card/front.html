@@ -1,24 +1,13 @@
-<div>
-  <div>
-    {% autoescape off %}}
-    {{ question }}
-    {{% endautoescape %}}
-  </div>
-  <div>
-    {% if validation_mode == 'WRITTEN' %}
-    <div>
-      <canvas id="input-canvas" class="input-canvas" style="border: 3px solid black"></canvas>
-    </div>
-    {% elif validation_mode == 'TYPED' %}
-    <div class="spacer">
-      <label class="input-label">Answer:</label>
-      <input id="answer-input" class="input-field" type="text"/>
-    </div>
-    {% elif validation_mode == 'NONE' %}
-    <div class="spacer">
-        <button class="input-button" onclick="">Right</button>
-        <button class="input-button" onclick="">Wrong</button>
-    </div>
-    {% endif %}
-  </div>
+{% extends "base.html" %}
+
+{% block extra_css %}
+{% autoescape off %}
+{{ css }}
+{% endautoescape %}
+{% endblock %}
+
+{% block content%}
+<div id="question-container">
+  {{ question }}
 </div>
+{% endblock %}

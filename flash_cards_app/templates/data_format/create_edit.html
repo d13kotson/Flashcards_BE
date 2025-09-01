@@ -11,8 +11,7 @@
                 "url": $("input#url-input").val(),
                 "field_set": fields.map((field) => { return {
                     "name": field.children()[1].value,
-                    "order": field.children()[4].value,
-                    "xpath": field.children()[7].value
+                    "xpath": field.children()[4].value
                 }})
             }, () => {
                 $(location).attr("href", "/app/data-formats/");
@@ -25,8 +24,7 @@
                 "url": $("input#url-input").val(),
                 "field_set": fields.map((field) => { return {
                     "name": field.children()[1].value,
-                    "order": field.children()[4].value,
-                    "xpath": field.children()[7].value
+                    "xpath": field.children()[4].value
                 }})
             }, () => {
                 $(location).attr("href", "/app/data-formats/");
@@ -34,7 +32,7 @@
         }
 
         function createField() {
-            let field = $('<div class="spacer"><label class="input-label">Field Name:</label><input class="input-field" type="text"/><br /><label class="input-label">Field Order:</label><input class="input-field" type="number"/><br /><label class="input-label">Field XPath:</label><input class="input-field" type="text"/></div>');
+            let field = $('<div class="spacer"><label class="input-label">Field Name:</label><input class="input-field" type="text"/><br /><label class="input-label">Field XPath:</label><input class="input-field" type="text"/></div>');
             fields.push(field);
             $("#fields-div").append(field);
         }
@@ -49,7 +47,17 @@
             <label class="input-label" for="url">URL: </label>
             <input id="url-input" class="input-field" name="url" type="text" value="{{url}}"/>
         </div>
-        <div id="fields-div"></div>
+        <div id="fields-div">
+            {% for field in field_set %}
+                <div class="spacer">
+                    <label class="input-label">Field Name:</label>
+                    <input class="input-field" type="text" value="{{field.name}}"/>
+                    <br />
+                    <label class="input-label">Field XPath:</label>
+                    <input class="input-field" type="text" value="{{field.xpath}}"/>
+                </div>
+            {% endfor %}
+        </div>
     </div>
     <div class="spacer">
         <button class="input-button" onclick="createField()">Add Field</button>

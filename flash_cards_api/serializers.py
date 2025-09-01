@@ -1,8 +1,5 @@
-from time import sleep
-
-from selenium.webdriver.common.by import By
-
 from flash_cards_api import models
+from flash_cards_api.helpers.selenium import get_value
 from rest_framework import serializers
 
 from selenium import webdriver
@@ -48,6 +45,16 @@ class CardSerializer(serializers.ModelSerializer):
         return data
 
 
+class CardFormatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.CardFormat
+        fields = '__all__'
+
+
+class CardQuizSerializer(CardSerializer):
+    format = CardFormatSerializer()
+
+
 class DataSerializer(serializers.ModelSerializer):
     field_value_set = FieldValueSerializer(many=True, partial=True)
 
@@ -72,29 +79,36 @@ class DataSerializer(serializers.ModelSerializer):
             for field in fields
         }
         instance = super().create(validated_data)
-        for field_value in fields:
-            field = field_value.pop('field')
-            if field.xpath:
-                options = Options()
-                options.add_argument('--headless')
-                driver = webdriver.Firefox(options=options)
-                driver.get(field.data_format.url.format(**field_dict))
-                sleep(3)
-                value = driver.find_element(By.XPATH, field.xpath).get_attribute('outerHTML')
-                css = '\n'.join([tag.get_attribute('outerHTML') for tag in driver.find_elements(By.XPATH, '//style')] +
-                                [tag.get_attribute('outerHTML') for tag in driver.find_elements(By.XPATH, '//link[@rel="stylesheet"]')])
-                field_value['value'] = f'{css}\n{value}'
-                driver.close()
+        for field in instance.format.field_set.filter(xpath=''):
+            value = field_dict.get(field.name)
             serializer = FieldValueSerializer(
                 data={
                     'parent': instance.id,
                     'field': field.id,
-                    **field_value
+                    'value': value
                 },
                 partial=True
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
+        if instance.format.url:
+            options = Options()
+            options.add_argument('--headless')
+            driver = webdriver.Firefox(options=options)
+            driver.get(instance.format.url.format(**field_dict))
+            for field in instance.format.field_set.filter(xpath__isnull=False).exclude(xpath=''):
+                value = get_value(driver, field.xpath)
+                serializer = FieldValueSerializer(
+                    data={
+                        'parent': instance.id,
+                        'field': field.id,
+                        'value': value
+                    },
+                    partial=True
+                )
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+            driver.close()
         return instance
 
     def update(self, instance, validated_data):
@@ -112,7 +126,7 @@ class DataSerializer(serializers.ModelSerializer):
                 )
             else:
                 try:
-                    field_obj = models.Field.objects.get(parent=instance, field=field['field'])
+                    field_obj = field['field']
                     serializer = FieldSerializer(
                         field_obj,
                         data={
@@ -134,12 +148,6 @@ class DataSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class CardFormatSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.CardFormat
-        fields = '__all__'
-
-
 class DataFormatSerializer(serializers.ModelSerializer):
     field_set = FieldSerializer(many=True, partial=True)
 
@@ -148,13 +156,6 @@ class DataFormatSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
-        order_nums = [field['order'] for field in data.get('field_set', [])]
-        if self.instance:
-            order_nums.extend(field.order for field in
-                              models.Field.objects.filter(data_format=self.instance)
-                              .exclude(id__in=[field.get('id') for field in data['field_set']]))
-        if len(order_nums) != len(set(order_nums)):
-            raise serializers.ValidationError('Duplicate field orders found')
         return super().validate(data)
 
     def create(self, validated_data):
@@ -199,6 +200,11 @@ class DataFormatSerializer(serializers.ModelSerializer):
 
 
 class DeckSerializer(serializers.ModelSerializer):
+    num_due = serializers.SerializerMethodField(required=False)
+
+    def get_num_due(self, instance):
+        return instance.due_cards.count()
+
     class Meta:
         model = models.Deck
         fields = '__all__'

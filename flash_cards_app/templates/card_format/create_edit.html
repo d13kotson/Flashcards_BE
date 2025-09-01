@@ -10,6 +10,7 @@
                 "answer_html": $("input#answer-input").val(),
                 "data_format": $("select#df-input").val(),
                 "default_deck": $("select#deck-input").val(),
+                "validation_mode": $("input#validation_mode").val()
             }
             sendPost("/api/card-formats/", data, () => {
                 $(location).attr("href", "/app/card-formats/");
@@ -23,6 +24,7 @@
                 "answer_html": $("input#answer-input").val(),
                 "data_format": $("select#df-input").val(),
                 "default_deck": $("select#deck-input").val(),
+                "validation_mode": $("input#validation_mode").val()
             }
             sendPatch("/api/card-formats/{{id}}/", data, () => {
                 $(location).attr("href", "/app/card-formats/");
@@ -69,6 +71,10 @@
         <div class="spacer">
             <label class="input-label" for="answer">Answer Template: </label>
             <input id="answer-input" class="input-field" name="answer" type="text" value="{{answer_html}}"/>
+        </div>
+        <div class="spacer">
+            <label class="input-label" for="answer">Validation Mode: </label>
+            <input id="validation-mode" class="input-field" name="validation" type="text" value="{{validation_mode}}"/>
         </div>
         <div class="spacer">
             <label class="input-label" for="df">Data Format: </label>

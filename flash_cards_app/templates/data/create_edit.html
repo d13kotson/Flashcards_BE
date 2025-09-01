@@ -3,6 +3,12 @@
 {% block app %}
 <div id="data_formats" class="app-window">
     <script>
+        const set_fields = {
+        {% for field in field_value_set %}
+        "{{field.field}}": "{{field.value}}",
+        {% endfor %}
+        }
+
         function createData() {
             let format = $("#df-input").val();
             let field_values = $(`#field-div-${format} .field-value-div`);
@@ -42,8 +48,12 @@
         }
 
         function createField(format, field) {
-            if(field.xpath == "") {
-                $(`#field-div-${format}`).append(`<div class="spacer field-value-div"><input type="hidden" class="field-id-input" value="${field.id}"/><label class="input-label">${field.name}:</label><input id="field-input-{field.id}" class="input-field field-value-input" type="text"/></div>`);
+            let value = set_fields[field.id];
+            if (value) {
+                $(`#field-div-${format}`).append(`<div class="spacer field-value-div"><input type="hidden" class="field-id-input" value="${field.id}"/><label class="input-label">${field.name}:</label><input id="field-input-${field.id}" class="input-field field-value-input" type="text" value="${value}" /></div>`);
+            }
+            else if (field.xpath == "") {
+                $(`#field-div-${format}`).append(`<div class="spacer field-value-div"><input type="hidden" class="field-id-input" value="${field.id}"/><label class="input-label">${field.name}:</label><input id="field-input-${field.id}" class="input-field field-value-input" type="text" /></div>`);
             }
         }
 

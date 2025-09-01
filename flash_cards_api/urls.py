@@ -12,5 +12,4 @@ router.register('cards', views.CardViewSet, basename='card')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('submit/', views.SubmitView.as_view()),
 ]

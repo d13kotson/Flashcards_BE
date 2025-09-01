@@ -68,6 +68,32 @@ div#app {
     display: none;
 }
 
+.horiz-scrollable {
+    display: flex;
+    width: 100%;
+    background-color: var(--gray-3);
+    color: var(--gray-1);
+    border-radius: 20px;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 20px;
+    gap: 16px;
+}
+
+.horiz-scroll-item {
+    flex: 0 0 300px;
+    width: 300px;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-contents: center;
+    transition: transform 0.2s ease;
+}
+
+.horiz-scrollable::-webkit-scrollbar {
+    display: none;
+}
+
 .sidebar-wrapper {
     height:100%;
     width:200px;
@@ -141,6 +167,29 @@ div#app {
 
 .list-link:hover {
     color: var(--cyan-4);
+}
+
+.answer {
+    display: none;
+}
+
+.fill-height {
+    height: 100%;
+}
+
+.canvas-container {
+    margin: auto;
+    position: relative;
+    width: 300px;
+    height: 300px;
+}
+
+.input-canvas {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
 }
 
 
@@ -374,3 +423,43 @@ hr{border:0;border-top:1px solid #eee;margin:20px 0}
 .w3-border-dark-grey,.w3-hover-border-dark-grey:hover,.w3-border-dark-gray,.w3-hover-border-dark-gray:hover{border-color:#616161!important}
 .w3-border-pale-red,.w3-hover-border-pale-red:hover{border-color:#ffe7e7!important}.w3-border-pale-green,.w3-hover-border-pale-green:hover{border-color:#e7ffe7!important}
 .w3-border-pale-yellow,.w3-hover-border-pale-yellow:hover{border-color:#ffffcc!important}.w3-border-pale-blue,.w3-hover-border-pale-blue:hover{border-color:#e7ffff!important}
+
+
+.stroke_order_diagram--outer_container {
+  width:100%;
+  overflow-x:auto;
+  overflow-y:hidden
+}
+.stroke_order_diagram--guide_line {
+  fill:none;
+  stroke:#ddd;
+  stroke-width:2;
+  stroke-linecap:square;
+  stroke-linejoin:square;
+  stroke-dasharray:5, 5
+}
+.stroke_order_diagram--bounding_box {
+  fill:none;
+  stroke:#ddd;
+  stroke-width:2;
+  stroke-linecap:square;
+  stroke-linejoin:square
+}
+.stroke_order_diagram--current_path {
+  fill:none;
+  stroke:#000;
+  stroke-width:3;
+  stroke-linecap:round;
+  stroke-linejoin:round
+}
+.stroke_order_diagram--existing_path {
+  fill:none;
+  stroke:var(--gray-2);
+  stroke-width:3;
+  stroke-linecap:round;
+  stroke-linejoin:round
+}
+.stroke_order_diagram--path_start {
+  fill:rgba(255,0,0,0.7);
+  stroke:none
+}
