@@ -40,10 +40,7 @@ def deck_quiz(request, deck_id):
 def deck_study(request, deck_id):
     deck = get_object_or_404(models.Deck, pk=deck_id)
     serializer = serializers.DeckSerializer(deck)
-    if deck.due_cards.count() > 0:
-        return render(request, 'deck/study.html', context=serializer.data)
-    else:
-        return redirect('/app/decks')
+    return render(request, 'deck/study.html', context=serializer.data)
 
 
 @login_required

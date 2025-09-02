@@ -43,8 +43,8 @@ class DeckViewSet(UserCreateViewSet):
     @action(detail=True, methods=['get'])
     def study(self, request, *args, **kwargs):
         instance = self.get_object()
-        cards = instance.card_set.order_by('last_correct').all()[:10]
-        serializer = serializers.CardQuizSerializer(cards, many=True)
+        card = instance.card_set.order_by('last_correct').first()
+        serializer = serializers.CardQuizSerializer(card)
         return Response(serializer.data)
 
 
@@ -89,9 +89,10 @@ class CardViewSet(UserCreateViewSet):
         now = datetime.now()
         instance.last_seen = now
         instance.last_correct = now
-        instance.total_correct += 1
-        instance.current_streak += 1
-        instance.calculate_next_due()
+        if request.data.get('study'):
+            instance.total_correct += 1
+            instance.current_streak += 1
+            instance.calculate_next_due()
         instance.save()
         return Response(self.serializer_class(instance).data)
 
@@ -99,9 +100,10 @@ class CardViewSet(UserCreateViewSet):
     def incorrect(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.last_seen = datetime.now()
-        instance.total_wrong += 1
-        instance.current_streak = 0
-        instance.calculate_next_due()
+        if request.data.get('study'):
+            instance.total_wrong += 1
+            instance.current_streak = 0
+            instance.calculate_next_due()
         instance.save()
         return Response(self.serializer_class(instance).data)
 

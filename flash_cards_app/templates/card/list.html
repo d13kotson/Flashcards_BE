@@ -1,0 +1,27 @@
+{% extends "app.html" %}
+
+{% block app %}
+<div id="decks" class="app-window">
+    <script>
+        function createList(card) {
+             card.map((df) => {
+                $("#card-list").append(
+                    `<li>
+                        <div class="spacer">
+                            <a class="list-link" href="/app/cards/${df.id}/">${df.name}</a>
+                        </div>
+                    </li>`
+                );
+             });
+        }
+
+        $(document).ready(function() {
+            sendGet("/api/cards", createList, null)
+        });
+    </script>
+    <div class="scrollable deck-list">
+        <ul id="card-list">
+        </ul>
+    </div>
+</div>
+{% endblock %}

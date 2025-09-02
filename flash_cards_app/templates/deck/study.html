@@ -1,0 +1,285 @@
+{% extends "app.html" %}
+
+{% block app %}
+<div id="decks" class="app-window scrollable">
+    <script>
+        let card = null;
+        function getCard(data) {
+            card = data;
+            $("#question").append(card.question);
+            $("#answer").append(card.answer);
+            if (card['format']['validation_mode'] === 'NONE') {
+                $('.none').show();
+                $('.typed').hide();
+                $('.written').hide();
+            }
+            else if (card['format']['validation_mode'] === 'TYPED') {
+                $('.none').hide();
+                $('.typed').show();
+                $('.written').hide();
+            }
+            else if (card['format']['validation_mode'] === 'WRITTEN') {
+                $('.none').hide();
+                $('.typed').hide();
+                $('.written').show();
+            }
+        }
+
+        $(document).ready(function() {
+            sendGet("/api/decks/{{id}}/study", getCard, null)
+        });
+    </script>
+    <div class="spacer question" style="height:50%;">
+        <div class="fill-height">
+          <script>
+            $(document).ready(function() {
+              // Select the canvas and its context
+              let canvas = $('#input-canvas-0')[0];
+              let ctx = canvas.getContext('2d');
+              let count = 0;
+
+              // Set initial drawing properties
+              ctx.strokeStyle = '#000000'; // Stroke color
+              ctx.lineWidth = 5; // Line width
+
+              function resizeCanvas() {
+                // Get the parent div
+                var $parentDiv = $('#canvas-container');
+                // Calculate new width and height (80% of parent div)
+                var newWidth = $parentDiv.width();
+                var newHeight = $parentDiv.height();
+                ctx.canvas.width = newWidth;
+                ctx.canvas.height = newHeight;
+                ctx.strokeStyle = '#000000'; // Stroke color
+                ctx.lineWidth = 5; // Line width
+              }
+
+              // Initial resize
+              resizeCanvas();
+
+              // Resize canvas on window resize
+              $(window).resize(function() {
+                resizeCanvas();
+              });
+
+              // Variables to track the drawing state
+              let isDrawing = false;
+
+              function setActiveCanvas() {
+                canvas = $("#input-canvas-" + count)[0];
+                ctx = canvas.getContext('2d');
+
+                let canv = $("#input-canvas-" + count)
+
+                canv.on('mousedown', startDrawing);
+                canv.on('mouseup mouseleave', stopDrawing);
+                canv.on('mousemove', draw);
+                canv.on('touchstart', startDrawing);
+                canv.on('touchend', stopDrawing);
+                canv.on('touchcancel', stopDrawing);
+                canv.on('touchmove', draw);
+              }
+
+              // Function to add a new overlapping canvas
+              function addCanvas(e) {
+                count++;
+                $(".input-canvas").off()
+
+                var canv = $('<canvas id="input-canvas-' + count + '" class="input-canvas"></canvas>');
+                $("#canvas-container").append(canv);
+                setActiveCanvas();
+                resizeCanvas();
+              }
+
+              // Function to start drawing
+              function startDrawing(e) {
+                e.preventDefault();
+                isDrawing = true;
+                draw(e); // Draw the initial point
+              }
+
+              // Function to stop drawing
+              function stopDrawing(e) {
+                e.preventDefault();
+                if (isDrawing) {
+                  isDrawing = false;
+                  addCanvas(e)
+                  ctx.beginPath(); // Begin a new path to avoid connecting lines between different drawing sessions
+                }
+              }
+
+              // Function to draw on the canvas
+              function draw(e) {
+                e.preventDefault();
+                if (!isDrawing) return;
+
+                // Get the mouse position relative to the canvas
+                const rect = $("#canvas-container")[0].getBoundingClientRect();
+                let x, y;
+
+                if (e.touches) {
+                  x = e.touches[0].clientX - rect.left;
+                  y = e.touches[0].clientY - rect.top;
+                }
+                else {
+                  x = e.clientX - rect.left;
+                  y = e.clientY - rect.top;
+                }
+
+                // Draw a line to the new mouse position
+                ctx.lineTo(x, y);
+                ctx.stroke();
+              }
+
+              // Event listeners for mouse events
+              $('#input-canvas-0').on('mousedown', startDrawing);
+              $('#input-canvas-0').on('mouseup mouseleave', stopDrawing);
+              $('#input-canvas-0').on('mousemove', draw);
+
+              $('#input-canvas-0').on('touchstart', startDrawing);
+              $('#input-canvas-0').on('touchend', stopDrawing);
+              $('#input-canvas-0').on('touchcancel', stopDrawing);
+              $('#input-canvas-0').on('touchmove', draw);
+
+              function success(data) {
+                $(".answer").show();
+                $(".question-input").hide();
+                let correct_string = "";
+                if(data['correct']) {
+                  $(".correct").show();
+                  $(".incorrect").hide();
+                  correct_string = "That looks correct!";
+                }
+                else {
+                  $(".incorrect").show();
+                  $(".correct").hide();
+                  correct_string = "That does not look correct.";
+                }
+                $("#correctness").append(`<span>${correct_string}</span>`);
+                $("#correctness").show();
+              }
+
+              $('#written-submit').on('click', function() {
+                // Convert canvas content to a data URL (base64 encoded)
+                const dataURL = canvas.toDataURL('image/png');
+
+                // sendPost("/api/cards/" + card["id"] + "/check_written/", {image: dataURL}, success, null);
+                success({"correct": false});
+                for (let i = 0; i < count; i++) {
+                    $("#written-content").append('<div class="canvas-container horiz-scroll-item" style="width:300px;height:300px"><canvas id="written-result-' + i + '" class="input-canvas"/></div>');
+                    const destinationCanvas = $("#written-result-" + i)[0];
+                    const destinationContext = destinationCanvas.getContext("2d");
+                    destinationContext.canvas.width = 300;
+                    destinationContext.canvas.height = 300;
+                }
+                for (let i = 0; i < count; i++) {
+                    const sourceCanvas = $("#input-canvas-" + i)[0];
+                    for (let j = i; j < count; j++) {
+                        const destinationCanvas = $("#written-result-" + j)[0];
+                        const destinationContext = destinationCanvas.getContext("2d");
+                        destinationContext.drawImage(sourceCanvas, 0, 0);
+                    }
+                }
+              });
+
+              // Event listener for the clear button
+              $('#canvas-clear').on('click', function() {
+                  // Clear the canvas
+                  count = -1;
+                  $(".input-canvas").remove();
+                  addCanvas(null);
+              });
+              // Event listener for the back button
+              $('#canvas-undo').on('click', function() {
+                  // Undo the last stroke
+                  if (count === 0) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.beginPath();
+                  }
+                  else {
+                    $("#input-canvas-" + count).remove();
+                    count--;
+                    setActiveCanvas();
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.beginPath();
+                  }
+              });
+
+              // Event listener for the typed submit button
+              $('#typed-submit').on('click', function() {
+                sendPost("/api/cards/" + card["id"] + "/check_typed /", {answer: $('#answer-input').val()}, success, null);
+              });
+
+              // Event listener for the no verify submit button
+              $('#no-submit').on('click', function() {
+                $(".answer").show();
+              });
+            });
+          </script>
+          <div>
+            <div id="question"></div>
+          </div>
+          <div class="fill-height">
+            <div id="written-verify" class="spacer written" style="height: 80%;">
+              <div id="canvas-container" class="canvas-container" style="border: 3px solid black">
+                <canvas id="input-canvas-0" class="input-canvas"></canvas>
+              </div>
+              <br/>
+              <button id="canvas-clear" class="input-button question-input">Clear</button>
+              <button id="canvas-undo" class="input-button question-input">Undo</button>
+              <button id="written-submit" class="input-button question-input">Check</button>
+            </div>
+            <div id="typed-verify" class="spacer typed">
+              <label class="input-label">Answer:</label>
+              <input id="answer-input" class="input-field question-input" type="text"/>
+              <br/>
+              <button id="typed-submit" class="input-button question-input">Check</button>
+            </div>
+            <div id="no-verify" class="spacer none">
+                <button id="no-submit" class="input-button">Check</button>
+            </div>
+            <div id="correctness" style="display: none"></div>
+          </div>
+        </div>
+    </div>
+    <div class="spacer answer">
+        <div>
+          <script>
+            $(document).ready(function() {
+
+              function success(data) {
+                window.location.replace("/app/decks/{{id}}/study");
+              }
+
+              function correct() {
+                sendPost("/api/cards/" + card["id"] + "/correct/", {"study": true}, success, null);
+              }
+
+              function incorrect() {
+                sendPost("/api/cards/" + card["id"] + "/incorrect/", {"study": true}, success, null);
+              }
+
+              $('#unverified-button').on('click', correct);
+              $('#verified-correct').on('click', correct);
+              $('#verified-incorrect').on('click', incorrect);
+            });
+          </script>
+            <div id="answer"></div>
+          <div>
+            <div class="spacer">
+              <div id="written-content" class="spacer written horiz-scrollable">
+              </div>
+              <span>{{ response }}</span>
+              <div class="correct">
+                <button id="unverified-button" class="input-button">Next</button>
+              </div>
+              <div class="incorrect">
+                <button id="verified-correct" class="input-button">Correct</button>
+                <button id="verified-incorrect" class="input-button">Wrong</button>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

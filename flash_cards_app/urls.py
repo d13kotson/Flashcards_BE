@@ -7,6 +7,7 @@ urlpatterns = [
     path('decks/create/', views.deck_create),
     path('decks/<int:deck_id>/', views.deck_edit),
     path('decks/<int:deck_id>/quiz', views.deck_quiz),
+    path('decks/<int:deck_id>/study', views.deck_study),
     path('data-formats/', views.data_formats),
     path('data-formats/create/', views.data_format_create),
     path('data-formats/<int:data_format_id>/', views.data_format_edit),
